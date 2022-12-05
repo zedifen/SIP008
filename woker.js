@@ -6,21 +6,40 @@ const page = `<!DOCTYPE html>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Convert V2RayN Sub to SIP008</title>
   <style>
-    body {
-      padding: 10px;
-    }
+body {
+  padding: 10px;
+}
+input + span {
+  padding-right: 30px;
+}
+input:invalid + span::after {
+  position: absolute;
+  content: "✖";
+  color: red;
+  padding-left: 5px;
+}
+input:valid + span::after {
+  position: absolute;
+  content: "✓";
+  color: green;
+  padding-left: 5px;
+}
   </style>
 </head>
 <body>
   <h1>Convert V2RayN Sub to SIP008</h1>
   <p>Input your subscription link: </p>
-  <input 
+  <div><input 
     id="v2rayn-link"
-    type="text"
-    placeholder="Paste V2RayN subscription link here ..."
+    name="v2rayn-link"
+    type="url"
+    pattern="https://.*"
+    title="Paste V2RayN subscription link here ..."
+    placeholder="https://example.com/link/1234567abcdef"
     spellcheck="false"
-    size="96"
-  />
+    required
+    size="72"
+  /><span class="validity"></span></div>
   <br/>
   <p>Get converted subscription at: <a id="converted"></a></p>
   <script>
