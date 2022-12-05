@@ -1,59 +1,4 @@
-const page = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Convert V2RayN Sub to SIP008</title>
-  <style>
-body {
-  padding: 10px;
-}
-input + span {
-  padding-right: 30px;
-}
-input:invalid + span::after {
-  position: absolute;
-  content: "✖";
-  color: red;
-  padding-left: 5px;
-}
-input:valid + span::after {
-  position: absolute;
-  content: "✓";
-  color: green;
-  padding-left: 5px;
-}
-  </style>
-</head>
-<body>
-  <h1>Convert V2RayN Sub to SIP008</h1>
-  <p>Input your subscription link: </p>
-  <div><input 
-    id="v2rayn-link"
-    name="v2rayn-link"
-    type="url"
-    pattern="https://.*"
-    title="Paste V2RayN subscription link here ..."
-    placeholder="https://example.com/link/1234567abcdef"
-    spellcheck="false"
-    required
-    size="72"
-  /><span class="validity"></span></div>
-  <br/>
-  <p>Get converted subscription at: <a id="converted"></a></p>
-  <script>
-    const origin = (window.location.origin + '/') || 'https://example.org/';
-    const userInput = document.getElementById('v2rayn-link');
-    const outputLink = document.getElementById('converted');
-    userInput.addEventListener('input', () => {
-      converted = origin + '?link=' + encodeURIComponent(userInput.value);
-      outputLink.setAttribute('href', converted);
-      outputLink.innerHTML = converted;
-    });
-  </script>
-</body>
-</html>`
+const pageUrl = 'https://gist.githubusercontent.com/zedifen/a18631c23094fb13ecaf3a1fb163c837/raw/ui.html'
 
 export default {
   async fetch(request, env) {
@@ -114,7 +59,9 @@ async function handleRequest(request) {
 
   if (pathname == '/') {
     if (link === null) {
-      return new Response(page, {
+      let ui;
+      await fetch(pageUrl).then((r) => r.text()).then((t) => { ui = t; });
+      return new Response(ui, {
         status: 200,
         headers: {
           "content-type": "text/html;charset=utf-8"
