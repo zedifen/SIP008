@@ -78,13 +78,23 @@ function makeSIP008Sub(shareLinks) {
   return sub;
 }
 
+function isValidHttpUrl(s) {
+  let url;
+  try {
+    url = new URL(s);
+  } catch (err) {
+    return false;
+  }
+  return url.protocol === "http:" || url.protocol === "https:";
+}
+
 async function handleRequest(request) {
   const url = new URL(request.url);
   const pathname = url.pathname;
   const link = url.searchParams.get("link");
 
   if (pathname == '/') {
-    if (link === null || link === '') {
+    if (link === null) {
       return new Response(page, {
         status: 200,
         headers: {
@@ -92,7 +102,10 @@ async function handleRequest(request) {
         }
       });
     } else {
-      let returnedContent = '123';
+      if (!isValidHttpUrl(link)) {
+        return new Response("Link '" + link + "' is not valid.", { status: 400 })
+      }
+      let returnedContent;
       await fetch(link, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)',
@@ -102,8 +115,13 @@ async function handleRequest(request) {
         .then((t) => {
           returnedContent = t;
         })
-        .catch((err) => new Response(err.stack, { status: 500 }))
-      const shareLinks = atob(returnedContent).split(/\r?\n/);
+        .catch((err) => new Response(err.stack, { status: 500 }));
+      let shareLinks;
+      try {
+        shareLinks = atob(returnedContent).split(/\r?\n/);
+      } catch (err) {
+        return new Response("Cannot parse content of the link.", { status: 400 });
+      }
       return new Response(JSON.stringify(makeSIP008Sub(shareLinks)), {
         status: 200,
         headers: {
