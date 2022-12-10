@@ -1,9 +1,9 @@
 // Host the page html as-is and this script on some service like GitHub Gist.
 // Then deploy this to Cloudflare Workers.
-// Remember to modify variables below.
+// Remember to set Environment Variables as below.
 
-const pageUrl = 'https://gist.githubusercontent.com/{YOUR_USER_NAME}/{REPO_HASH}/raw/ui.html'
-const codeUrl = 'https://gist.githubusercontent.com/{YOUR_USER_NAME}/{REPO_HASH}/raw/worker.js'
+// pageUrl : https://gist.githubusercontent.com/{YOUR_USER_NAME}/{REPO_HASH}/raw/ui.html
+// codeUrl : https://gist.githubusercontent.com/{YOUR_USER_NAME}/{REPO_HASH}/raw/worker.js
 
 export default {
   async fetch(request, env) {
@@ -22,9 +22,9 @@ function ssToSIP008(link) {
   const method = c[0];
   const password = c[1];
   let s = l[1].split(':');
-  let o = s[1].split('/');
+  let o = s[1].split('?');
   const address = s[0];
-  const port = Number(o[0]);
+  const port = Number(o[0].split('/')[0]);
   const params = o[1];
   let obj = {
     'id': name,
@@ -69,7 +69,7 @@ function isValidHttpUrl(s) {
   return url.protocol === "http:" || url.protocol === "https:";
 }
 
-async function handleRequest(request, {DB}) {
+async function handleRequest(request, {pageUrl, codeUrl, DB}) {
   const url = new URL(request.url);
   const pathname = url.pathname;
   const routeGet = '/get/'
