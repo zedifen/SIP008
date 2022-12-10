@@ -1,4 +1,9 @@
-const pageUrl = 'https://gist.githubusercontent.com/zedifen/a18631c23094fb13ecaf3a1fb163c837/raw/ui.html'
+// Host the page html as-is and this script on some service like GitHub Gist.
+// Then deploy this to Cloudflare Workers.
+// Remember to modify variables below.
+
+const pageUrl = 'https://gist.githubusercontent.com/{YOUR_USER_NAME}/{REPO_HASH}/raw/ui.html'
+const codeUrl = 'https://gist.githubusercontent.com/{YOUR_USER_NAME}/{REPO_HASH}/raw/worker.js'
 
 export default {
   async fetch(request, env) {
@@ -68,6 +73,7 @@ async function handleRequest(request, {DB}) {
   const url = new URL(request.url);
   const pathname = url.pathname;
   const routeGet = '/get/'
+  const routeCodeSrc = '/src.js'
 
   if (pathname == '/') {
     const link = url.searchParams.get("link");
@@ -131,6 +137,15 @@ async function handleRequest(request, {DB}) {
         });
       }
     }
+  } else if (pathname == routeCodeSrc) {
+    let code;
+    await fetch(codeUrl).then((r) => r.text()).then((t) => { code = t; });
+    return new Response(code, {
+      status: 200,
+      headers: {
+        "content-type": "text/plain;charset=utf-8"
+      }
+    });
   } else {
     return new Response('Path not found.', {
       status: 404,
