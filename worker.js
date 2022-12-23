@@ -72,7 +72,7 @@ function isValidHttpUrl(s) {
 async function handleRequest(request, {pageUrl, codeUrl, DB}) {
   const url = new URL(request.url);
   const pathname = url.pathname;
-  const routeGet = '/get/'
+  const routeGet = '/get'
   const routeCodeSrc = '/src.js'
 
   if (pathname == '/') {
