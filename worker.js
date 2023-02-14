@@ -13,6 +13,38 @@ export default {
   }
 }
 
+function dumpToYaml(obj, depth=0) {
+  const indentCount = 2;
+  const indentChar = ' ';
+  const indent = indentChar.repeat(indentCount);
+  let s = '';
+  const isArray = Array.isArray(obj);
+  for (const i in obj) {
+    s += indent.repeat(depth) + (isArray ? '- ' : `${i}: `);
+    const val = obj[i];
+    switch (typeof val) {
+      case 'string':
+        const l = val.split('\n');
+        const d = '\n' + indent.repeat(depth + 1);
+        s += l.length > 1 
+          /* |[  If there's spaces to be preserved in front of line   ][  ][          ] */
+          ? `|${l[0][0] === ' ' ? `${indentCount * (depth + 1)}-` : ''}${d}${l.join(d)}`      // Muiltiple lines
+          : '`~!@#%&:,?\'"{}[]|-'.includes(val[0]) ? `"${val.replaceAll('"', '\\"')}"` : val; // A single line
+        s += '\n';
+        break;
+      case 'number':
+      case 'boolean':
+        s += `${val}`;
+        s += '\n';
+        break;
+      default:
+        s += '\n';
+        s += dumpToYaml(val, depth + 1);
+    }
+  }
+  return s;
+}
+
 function ssToSIP008(link) {
   const u = link.substring(5); // skip 'ss://'
   let p = u.split('#');
@@ -46,6 +78,32 @@ function ssToSIP008(link) {
   return obj;
 }
 
+function sip008toClash(obj) {
+  const opts = {};
+  for (const opt of obj['plugin_opts'].split(';')) {
+    let l = opt.split('=');
+    opts[l[0]] = (l.length > 1) ? l[1] : l[0];
+  }
+  let config = {
+    'name': obj['remarks'],
+    'type': 'ss',
+    'server': obj['server'],
+    'port': obj['server_port'],
+    'cipher': obj['method'],
+    'password': obj['password'],
+  }
+  if (obj['plugin']) {
+    config['plugin'] = obj['plugin'],
+    config['plugin-opts'] = {
+      'mode': opts['mode'] || 'websocket',
+      'tls': opts['tls'] === 'tls',
+      'host': opts['host'],
+      'path': opts['path'],
+    };
+  }
+  return config;
+}
+
 function makeSIP008Sub(shareLinks) {
   let sub = {
     'version': 1,
@@ -54,6 +112,21 @@ function makeSIP008Sub(shareLinks) {
   shareLinks.forEach((link) => {
     if (link.startsWith('ss:')) {
       sub['servers'].push(ssToSIP008(link));
+    }
+  })
+  return sub;
+}
+
+function makeClashSub(shareLinks) {
+  let sub = {
+    'port': 7890,
+    'socks-port': 7891,
+    'allow-lan': false,
+    'proxies': [],
+  };
+  shareLinks.forEach((link) => {
+    if (link.startsWith('ss:')) {
+      sub['proxies'].push(sip008toClash(ssToSIP008(link)));
     }
   })
   return sub;
@@ -116,6 +189,7 @@ async function handleRequest(request, {pageUrl, codeUrl, DB}) {
     }
   } else if (pathname.startsWith(routeGet)) {
     const u = url.searchParams.get("user");
+    const t = url.searchParams.get("sub");
     if (u === null || u === '') {
       return new Response("Bad user.", { status: 400 });
     } else {
@@ -129,12 +203,24 @@ async function handleRequest(request, {pageUrl, codeUrl, DB}) {
           let url = await DB.get(sId);
           s.push(url);
         }
-        return new Response(JSON.stringify(makeSIP008Sub(s)), {
-          status: 200,
-          headers: {
-            "content-type": "application/json;charset=utf-8"
-          }
-        });
+        switch (t) {
+          case 'clash':
+            return new Response(dumpToYaml(makeClashSub(s)), {
+              status: 200,
+              headers: {
+                "content-type": "text/x-yaml;charset=utf-8"
+              }
+            });
+            break;
+          case 'ss':
+          default:
+            return new Response(JSON.stringify(makeSIP008Sub(s)), {
+              status: 200,
+              headers: {
+                "content-type": "application/json;charset=utf-8"
+              }
+            });
+        }
       }
     }
   } else if (pathname == routeCodeSrc) {
