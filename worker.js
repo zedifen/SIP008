@@ -88,7 +88,7 @@ function sip008toClash(obj) {
     'type': 'ss',
     'server': obj['server'],
     'port': obj['server_port'],
-    'cipher': obj['method'],
+    'cipher': obj['method'] === 'none' ? 'dummy' : obj['method'],
     'password': obj['password'],
   }
   if (obj['plugin']) {
