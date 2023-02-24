@@ -18,7 +18,7 @@ function dumpToYaml(obj, depth=0, inArray) {
   let s = '';
   const isArray = Array.isArray(obj);
   for (const i in obj) {
-    s += (inArray ? '' : indent.repeat(depth)) + (isArray ? '- ' : `${i}: `);
+    s += (inArray ? '' : indent.repeat(depth)) + (isArray ? '-' : `${i}:`);
     inArray = false;
     const val = obj[i];
     switch (typeof val) {
@@ -26,18 +26,18 @@ function dumpToYaml(obj, depth=0, inArray) {
         const l = val.split('\n');
         const d = '\n' + indent.repeat(depth + 1);
         s += l.length > 1 
-          /* |[  If there's spaces to be preserved in front of line     ][  ][          ] */
-          ? `|${l[0][0] === ' ' ? `${indent.length * (depth + 1)}-` : ''}${d}${l.join(d)}`    // Muiltiple lines
-          : '`~!@#%&:,?\'"{}[]|-'.includes(val[0]) ? `"${val.replaceAll('"', '\\"')}"` : val; // A single line
+          /*  |[  If there's spaces to be preserved in front of line     ][  ][          ] */
+          ? ` |${l[0][0] === ' ' ? `${indent.length * (depth + 1)}-` : ''}${d}${l.join(d)}`    // Muiltiple lines
+          : '`~!@#%&:,?\'"{}[]|-'.includes(val[0]) ? ` "${val.replaceAll('"', '\\"')}"` : ` ${val}`; // A single line
         s += '\n';
         break;
       case 'number':
       case 'boolean':
-        s += `${val}`;
+        s += ` ${val}`;
         s += '\n';
         break;
       default:
-        s += isArray ? '' : '\n';
+        s += isArray ? ' ' : '\n';
         s += dumpToYaml(val, depth + 1, isArray);
     }
   }
