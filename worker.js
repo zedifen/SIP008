@@ -155,10 +155,11 @@ function isValidHttpUrl(s) {
 async function handleRequest(request, {pageUrl, codeUrl, DB}) {
   const url = new URL(request.url);
   const pathname = url.pathname;
+  const routeConvert = '/sip008'
   const routeGet = '/get'
   const routeCodeSrc = '/src.js'
 
-  if (pathname == '/') {
+  if (pathname === '/' || pathname.startsWith(routeConvert)) {
     const link = url.searchParams.get("link");
     const r = url.searchParams.get("route");
     if (link === null) {
