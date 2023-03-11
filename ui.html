@@ -48,6 +48,24 @@ input:valid + span::after {
   <p>This service will not store the data you provided. This page is served as-is, while the script source can be checked at: <a href="./src.js">src.js</a>.</p>
   <p>For safety you may want to host this yourself, then please follow the instructions in <a href="./src.js">the script</a>.</p>
 </div>
+  <h2>Settings</h2>
+  <div><p><label for="routeOption">
+      Route options <a href="https://github.com/shadowsocks/shadowsocks-android/blob/master/.github/doc-json.md" title="Feature of Shadowsocks Android">(?)</a>:
+  </label>
+  <select name="routeOption" id="route-option">
+    <option value="all">All</option>
+    <option value="bypass-lan">Bypass LAN</option>
+    <option value="bypass-china">Bypass mainland China</option>
+    <option value="bypass-lan-china" selected>Bypass LAN &amp; mainland China</option>
+    <option value="gfwlist">GFW List</option>
+    <option value="china-list">China List</option>
+    <option value="custom-rules">Custom Rules</option>
+  </select></p>
+  <p><label for="subscriptionType">Subscription Type:</label>
+  <select name="subscriptionType" id="subscription-type">
+    <option value="sip008" selected>SIP008</option>
+    <option value="clash">Clash</option>
+  </select></p></div>
   <h2>Convert V2RayN Subscriptions</h2>
   <p>Input your subscription link: </p>
   <div class="link-input"><input 
@@ -83,6 +101,8 @@ input:valid + span::after {
   </div>
   <script>
     const origin = (window.location.origin + '/') || 'https://example.org/';
+    const routeOption = document.getElementById('route-option');
+    const subscriptionType = document.getElementById('subscription-type');
     const userInput = document.getElementById('v2rayn-link');
     const outputLink = document.getElementById('converted');
     const updateConvertedLink = (function () {
@@ -93,6 +113,8 @@ input:valid + span::after {
       url.searchParams.set('route', routeOption.value);
       outputLink.value = link === '' ? '' : url.toString();
     });
+    routeOption.addEventListener('input', updateConvertedLink);
+    subscriptionType.addEventListener('input', updateConvertedLink);
     userInput.addEventListener('input', updateConvertedLink);
 
     const usernameInput = document.getElementById('username');
@@ -100,10 +122,22 @@ input:valid + span::after {
     const updateUserSubscriptionLink = (function () {
       const username = usernameInput.value.trim();
       let url = new URL(origin);
-      url.pathname = '/get/sub.json';
+      switch (subscriptionType.value) {
+        case 'clash':
+          url.pathname = '/get/sub.yaml';
+          url.searchParams.set('sub', 'clash');
+          break;
+        case 'sip008':
+        default:
+          url.pathname = '/get/sub.json';
+          url.searchParams.set('route', routeOption.value);
+          break;
+      }
       url.searchParams.set('user', username);
       subscriptionLink.value = username === '' ? '' : url.toString();
     });
+    routeOption.addEventListener('input', updateUserSubscriptionLink);
+    subscriptionType.addEventListener('input', updateUserSubscriptionLink);
     usernameInput.addEventListener('input', updateUserSubscriptionLink);
 
     const copyButtonText = 'Copy';
