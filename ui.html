@@ -4,12 +4,20 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="SIP008 Subscription Service. Powered by Cloudflare.">
+  <meta name="description" content="Convert V2RayN subscription to SIP008. Powered by Cloudflare.">
   <link rel="icon" type="image/png" href="https://workers.cloudflare.com/favicon.ico" sizes="48x48">
-  <title>Convert V2RayN Sub to SIP008</title>
+  <title>SIP008 Subscription Services</title>
   <style>
 body {
   padding: 10px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 640px;
+  max-width: 95%;
+}
+.link-input input {
+  width: 80%;
+  cursor: pointer;
 }
 input + span {
   padding-right: 30px;
@@ -34,14 +42,15 @@ input:valid + span::after {
   </style>
 </head>
 <body>
-  <h1>Convert V2RayN Sub to SIP008</h1>
+  <h1>SIP008 Subscription Services</h1>
 <div class="info">
   <p>Powered by <strong>Cloudflare Workers</strong>.</p>
   <p>This service will not store the data you provided. This page is served as-is, while the script source can be checked at: <a href="./src.js">src.js</a>.</p>
   <p>For safety you may want to host this yourself, then please follow the instructions in <a href="./src.js">the script</a>.</p>
 </div>
+  <h2>Convert V2RayN Subscriptions</h2>
   <p>Input your subscription link: </p>
-  <div><input 
+  <div class="link-input"><input 
     id="v2rayn-link"
     name="v2rayn-link"
     type="url"
@@ -50,18 +59,18 @@ input:valid + span::after {
     placeholder="https://example.com/link/1234567abcdef"
     spellcheck="false"
     required
-    size="72"
   /><span class="validity"></span></div>
-  <br/>
-  <p>Get converted subscription at: <a id="converted"></a></p>
+  <p>Get converted subscription at: </p>
+  <div class="link-input link-result">
+    <input type="text" class="result-link" id="converted"/>
+  </div>
   <script>
     const origin = (window.location.origin + '/') || 'https://example.org/';
     const userInput = document.getElementById('v2rayn-link');
     const outputLink = document.getElementById('converted');
     userInput.addEventListener('input', () => {
-      converted = origin + 'sip008/sub.json?link=' + encodeURIComponent(userInput.value);
-      outputLink.setAttribute('href', converted);
-      outputLink.innerHTML = converted;
+      const converted = origin + 'sip008/sub.json?link=' + encodeURIComponent(userInput.value);
+      outputLink.value = converted;
     });
   </script>
 </body>
