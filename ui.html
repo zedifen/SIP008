@@ -65,6 +65,22 @@ input:valid + span::after {
     <input type="text" class="result-link" id="converted"/>
     <button type="button" class="copy-link-button">Copy</button>
   </div>
+  <h2>Get Subscription by Username</h2>
+  <p>Input your Username:
+    <input
+      type="text"
+      class="result-link"
+      id="username"
+      placeholder="username"
+      spellcheck="false"
+      title="Type your username here ..."
+    />
+  </p>
+  <p>Get your subscription at: </p>
+  <div class="link-input link-result">
+    <input type="text" class="result-link" id="subscription"/>
+    <button type="button" class="copy-link-button">Copy</button>
+  </div>
   <script>
     const origin = (window.location.origin + '/') || 'https://example.org/';
     const userInput = document.getElementById('v2rayn-link');
@@ -72,6 +88,12 @@ input:valid + span::after {
     userInput.addEventListener('input', () => {
       const converted = origin + 'sip008/sub.json?link=' + encodeURIComponent(userInput.value);
       outputLink.value = converted;
+    });
+    const usernameInput = document.getElementById('username');
+    const subscriptionLink = document.getElementById('subscription');
+    usernameInput.addEventListener('input', () => {
+      const link = origin + 'get/sub.json?user=' + usernameInput.value;
+      subscriptionLink.value = link;
     });
     const copyButtonText = 'Copy';
     const copyButtonCopiedText = 'Copied!';
