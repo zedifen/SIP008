@@ -221,7 +221,7 @@ async function handleRequest(request, {pageUrl, codeUrl, DB}) {
             return new Response(dumpToYaml(makeClashSub(s)), {
               status: 200,
               headers: {
-                "content-type": "text/x-yaml;charset=utf-8"
+                "content-type": "application/yaml;charset=utf-8"
               }
             });
             break;
