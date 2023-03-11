@@ -85,22 +85,27 @@ input:valid + span::after {
     const origin = (window.location.origin + '/') || 'https://example.org/';
     const userInput = document.getElementById('v2rayn-link');
     const outputLink = document.getElementById('converted');
-    userInput.addEventListener('input', () => {
+    const updateConvertedLink = (function () {
       const link = userInput.value.trim();
       let url = new URL(origin);
       url.pathname = '/sip008/sub.json'
       url.searchParams.set('link', link);
+      url.searchParams.set('route', routeOption.value);
       outputLink.value = link === '' ? '' : url.toString();
     });
+    userInput.addEventListener('input', updateConvertedLink);
+
     const usernameInput = document.getElementById('username');
     const subscriptionLink = document.getElementById('subscription');
-    usernameInput.addEventListener('input', () => {
+    const updateUserSubscriptionLink = (function () {
       const username = usernameInput.value.trim();
       let url = new URL(origin);
       url.pathname = '/get/sub.json';
       url.searchParams.set('user', username);
       subscriptionLink.value = username === '' ? '' : url.toString();
     });
+    usernameInput.addEventListener('input', updateUserSubscriptionLink);
+
     const copyButtonText = 'Copy';
     const copyButtonCopiedText = 'Copied!';
     document.querySelectorAll('.link-result').forEach(linkResultContainer => {
