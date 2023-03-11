@@ -44,7 +44,7 @@ function dumpToYaml(obj, depth=0, inArray) {
   return s;
 }
 
-function ssToSIP008(link) {
+function ssToSIP008(link, route) {
   const u = link.substring(5); // skip 'ss://'
   let p = u.split('#');
   const name = decodeURIComponent(p[1]);
@@ -64,6 +64,7 @@ function ssToSIP008(link) {
     'password': password,
     'server': address,
     'server_port': port,
+    'route': route,  // Shadowsocks Android feature
   }
   if (params != '' && params != null) {
     const q = 'plugin=';
@@ -103,14 +104,24 @@ function sip008toClash(obj) {
   return config;
 }
 
-function makeSIP008Sub(shareLinks) {
+function makeSIP008Sub(shareLinks, route) {
   let sub = {
     'version': 1,
     'servers': [],
   };
+  const routeOptions = [  // Shadowsocks Android feature
+    'all',
+    'bypass-lan',
+    'bypass-china',
+    'bypass-lan-china',
+    'gfwlist',
+    'china-list',
+    'custom-rules'
+  ];
+  const r = (routeOptions.includes(route) ? route : 'bypass-lan-china');
   shareLinks.forEach((link) => {
     if (link.startsWith('ss:')) {
-      sub['servers'].push(ssToSIP008(link));
+      sub['servers'].push(ssToSIP008(link, r));
     }
   })
   return sub;
@@ -149,6 +160,7 @@ async function handleRequest(request, {pageUrl, codeUrl, DB}) {
 
   if (pathname == '/') {
     const link = url.searchParams.get("link");
+    const r = url.searchParams.get("route");
     if (link === null) {
       let ui;
       await fetch(pageUrl).then((r) => r.text()).then((t) => { ui = t; });
@@ -179,7 +191,7 @@ async function handleRequest(request, {pageUrl, codeUrl, DB}) {
       } catch (err) {
         return new Response("Cannot parse content of the link.", { status: 400 });
       }
-      return new Response(JSON.stringify(makeSIP008Sub(shareLinks)), {
+      return new Response(JSON.stringify(makeSIP008Sub(shareLinks, r)), {
         status: 200,
         headers: {
           "content-type": "application/json;charset=utf-8"
@@ -189,6 +201,7 @@ async function handleRequest(request, {pageUrl, codeUrl, DB}) {
   } else if (pathname.startsWith(routeGet)) {
     const u = url.searchParams.get("user");
     const t = url.searchParams.get("sub");
+    const r = url.searchParams.get("route");
     if (u === null || u === '') {
       return new Response("Bad user.", { status: 400 });
     } else {
@@ -213,7 +226,7 @@ async function handleRequest(request, {pageUrl, codeUrl, DB}) {
             break;
           case 'ss':
           default:
-            return new Response(JSON.stringify(makeSIP008Sub(s)), {
+            return new Response(JSON.stringify(makeSIP008Sub(s, r)), {
               status: 200,
               headers: {
                 "content-type": "application/json;charset=utf-8"
