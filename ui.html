@@ -86,18 +86,20 @@ input:valid + span::after {
     const userInput = document.getElementById('v2rayn-link');
     const outputLink = document.getElementById('converted');
     userInput.addEventListener('input', () => {
+      const link = userInput.value.trim();
       let url = new URL(origin);
       url.pathname = '/sip008/sub.json'
-      url.searchParams.set('link', userInput.value);
-      outputLink.value = url.toString();
+      url.searchParams.set('link', link);
+      outputLink.value = link === '' ? '' : url.toString();
     });
     const usernameInput = document.getElementById('username');
     const subscriptionLink = document.getElementById('subscription');
     usernameInput.addEventListener('input', () => {
+      const username = usernameInput.value.trim();
       let url = new URL(origin);
       url.pathname = '/get/sub.json';
-      url.searchParams.set('user', usernameInput.value);
-      subscriptionLink.value = url.toString();
+      url.searchParams.set('user', username);
+      subscriptionLink.value = username === '' ? '' : url.toString();
     });
     const copyButtonText = 'Copy';
     const copyButtonCopiedText = 'Copied!';
