@@ -79,11 +79,6 @@ function ssToSIP008(link, route) {
 }
 
 function sip008toClash(obj) {
-  const opts = {};
-  for (const opt of obj['plugin_opts'].split(';')) {
-    let l = opt.split('=');
-    opts[l[0]] = (l.length > 1) ? l[1] : l[0];
-  }
   let config = {
     'name': obj['remarks'],
     'type': 'ss',
@@ -93,6 +88,11 @@ function sip008toClash(obj) {
     'password': obj['password'],
   }
   if (obj['plugin']) {
+    const opts = {};
+    for (const opt of obj['plugin_opts'].split(';')) {
+      let l = opt.split('=');
+      opts[l[0]] = (l.length > 1) ? l[1] : l[0];
+    }
     config['plugin'] = obj['plugin'],
     config['plugin-opts'] = {
       'mode': opts['mode'] || 'websocket',
