@@ -65,6 +65,7 @@ function ssToSIP008(link, route) {
     'server': address,
     'server_port': port,
     'route': route,  // Shadowsocks Android feature
+    'remote_dns': '1.1.1.1',
   }
   if (params != '' && params != null) {
     const q = 'plugin=';
