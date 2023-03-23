@@ -213,6 +213,7 @@ async function handleRequest(request, {pageUrl, codeUrl, DB}) {
         l = l.split(',');
         let s = [];
         for (let sId of l) {
+          if (sId === '' || sId === null) continue;
           let url = await DB.get(sId);
           s.push(url);
         }
