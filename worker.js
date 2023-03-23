@@ -263,6 +263,7 @@ async function handleRequest(request, {pageUrl, codeUrl, DB}) {
         for (let sId of l) {
           if (sId === '' || sId === null) continue;
           let url = await DB.get(sId);
+          if (url === '' || url === null) continue;
           s.push(url);
         }
         switch (t) {
