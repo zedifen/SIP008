@@ -105,6 +105,51 @@ function sip008toClash(obj) {
   return config;
 }
 
+function vmessLinkToClash(link) {
+  const d = JSON.parse(atob(link.slice(8)));  // skip 'vmess://'
+  let config = {
+    name: d['ps'],
+    type: 'vmess',
+    server: d['add'],
+    port: d['port'],
+    uuid: d['id'],
+    alterId: d['aid'] || 0,
+    cipher: d['scy'],
+    tls: d['tls'] === 'tls',
+  };
+  config['network'] = d['net'];
+  switch (d['net']) {
+    case 'ws':
+      config['ws-opts'] = {
+        path: d['path'],
+        headers: {
+          'Host': d['sni'],
+        },
+        'max-early-data': 2048,
+        'early-data-header-name': 'Sec-WebSocket-Protocol',
+      };
+      break;
+    case 'h2':
+      config['tls'] = true,
+      config['h2-opts'] = {
+        host: [
+          d['host'],
+        ],
+        path: d['path'],
+      }
+      break;
+    case 'http':
+      config['http-opts'] = {
+        method: 'GET',
+        path: [
+          d[path],
+        ]
+      }
+      break;
+  }
+  return config;
+}
+
 function makeSIP008Sub(shareLinks, route) {
   let sub = {
     'version': 1,
@@ -138,6 +183,8 @@ function makeClashSub(shareLinks) {
   shareLinks.forEach((link) => {
     if (link.startsWith('ss:')) {
       sub['proxies'].push(sip008toClash(ssToSIP008(link)));
+    } else if (link.startsWith('vmess:')) {
+      sub['proxies'].push(vmessLinkToClash(link));
     }
   })
   return sub;
