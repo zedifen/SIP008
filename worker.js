@@ -2,8 +2,7 @@
 // Then deploy this to Cloudflare Workers.
 // Remember to set Environment Variables as below.
 
-// pageUrl : https://gist.githubusercontent.com/{YOUR_USER_NAME}/{REPO_HASH}/raw/ui.html
-// codeUrl : https://gist.githubusercontent.com/{YOUR_USER_NAME}/{REPO_HASH}/raw/worker.js
+// remoteResourceRoot : https://gist.githubusercontent.com/{YOUR_USER_NAME}/{REPO_HASH}/raw/{ui.html|worker.js|clash.json}
 
 export default {
   async fetch(request, env) {
@@ -165,28 +164,65 @@ function makeSIP008Sub(shareLinks, route) {
     'custom-rules'
   ];
   const r = (routeOptions.includes(route) ? route : 'bypass-lan-china');
-  shareLinks.forEach((link) => {
+  Object.entries(shareLinks).forEach(([i, link]) => {
     if (link.startsWith('ss:')) {
       sub['servers'].push(ssToSIP008(link, r));
     }
-  })
+  });
   return sub;
 }
 
-function makeClashSub(shareLinks) {
+async function makeClashSub(shareLinks, chains, url) {
   let sub = {
     'port': 7890,
     'socks-port': 7891,
     'allow-lan': false,
+    'mode': 'rule',
     'proxies': [],
+    'proxies-groups': [],
   };
-  shareLinks.forEach((link) => {
+  try { 
+    await fetch(url)
+      .then(r => r.json())
+      .then((d) => Object.entries(d).forEach(([k, v]) => {sub[k] = v}));
+  } catch(err) {
+    console.log(err);
+  }
+  const parseLink = (link) => {
     if (link.startsWith('ss:')) {
-      sub['proxies'].push(sip008toClash(ssToSIP008(link)));
+      return sip008toClash(ssToSIP008(link));
     } else if (link.startsWith('vmess:')) {
-      sub['proxies'].push(vmessLinkToClash(link));
+      return vmessLinkToClash(link);
+    } else { return null; }
+  }
+  const s = new Set();
+  const l = [];
+  if (chains.length > 0) {
+    for (const c of chains) {
+      for (let i = 0; i < c.length - 1; i += 1) {
+        s.add(c[i]);
+      }
     }
-  })
+    sub['proxies-groups'].push({  // forward group
+      'name': 'Forward',
+      'type': 'select',
+      'proxies': [...s],
+    });
+  }
+  Object.entries(shareLinks).forEach(([k, v]) => {
+    const t = parseLink(v);
+    shareLinks[k] = t;
+    sub['proxies'].push(t);
+    if (!s.has(k)) { l.push(k); }
+  });
+  sub['proxies-groups'].push({  // default group
+    'name': 'Default',
+    'type': 'select',
+    'proxies': l,
+  });
+  sub['proxies-groups'].forEach(group => {
+    group['proxies'] = group['proxies'].map(i => shareLinks[i]['name']);
+  });
   return sub;
 }
 
@@ -200,12 +236,21 @@ function isValidHttpUrl(s) {
   return url.protocol === "http:" || url.protocol === "https:";
 }
 
-async function handleRequest(request, {pageUrl, codeUrl, DB}) {
+async function handleRequest(request, {remoteResourceRoot, DB}) {
   const url = new URL(request.url);
   const pathname = url.pathname;
   const routeConvert = '/sip008'
   const routeGet = '/get'
   const routeCodeSrc = '/src.js'
+
+  const pageUrl = new URL('ui.html', remoteResourceRoot).toString();
+  const codeUrl = new URL('worker.js', remoteResourceRoot).toString();
+  const clashConfigUrl = new URL('clash.json', remoteResourceRoot).toString();
+
+  const getValueOfKey = async function (sId) {
+    if (sId === '' || sId === null) return null;
+    return await DB.get(sId);
+  };
 
   if (pathname === '/' || pathname.startsWith(routeConvert)) {
     const link = url.searchParams.get("link");
@@ -259,16 +304,26 @@ async function handleRequest(request, {pageUrl, codeUrl, DB}) {
         return new Response("Bad user.", { status: 400 });
       } else {
         l = l.split(',');
-        let s = [];
-        for (let sId of l) {
-          if (sId === '' || sId === null) continue;
-          let url = await DB.get(sId);
-          if (url === '' || url === null) continue;
-          s.push(url);
+        let s = {};
+        let c = [];  // proxy chains
+        for (let f of l) {
+          const q = f.split(':').map(i => i.trim());
+          if (q.length > 1) {
+            c.push(q);
+            for (const i of q) { 
+              if (!s[i]) {
+                const z = await getValueOfKey(i);
+                if (z !== null || z !== '') s[i] = z;
+              }
+            }
+          } else {
+            const z = await getValueOfKey(q[0]);
+            if (z !== null || z !== '') s[q[0]] = z;
+          }
         }
         switch (t) {
           case 'clash':
-            return new Response(dumpToYaml(makeClashSub(s)), {
+            return new Response(dumpToYaml(await makeClashSub(s, c, clashConfigUrl)), {
               status: 200,
               headers: {
                 "content-type": "application/yaml;charset=utf-8"
