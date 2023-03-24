@@ -107,13 +107,13 @@ function sip008toClash(obj) {
 function vmessLinkToClash(link) {
   const d = JSON.parse(atob(link.slice(8)));  // skip 'vmess://'
   let config = {
-    name: d['ps'],
+    name: d['ps'] || d['remark'] || 'vmess',
     type: 'vmess',
     server: d['add'],
     port: d['port'],
     uuid: d['id'],
     alterId: d['aid'] || 0,
-    cipher: d['scy'],
+    cipher: d['scy'] || 'auto',
     tls: d['tls'] === 'tls',
   };
   config['network'] = d['net'];
