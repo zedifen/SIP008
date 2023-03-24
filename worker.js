@@ -179,7 +179,7 @@ async function makeClashSub(shareLinks, chains, url) {
     'allow-lan': false,
     'mode': 'rule',
     'proxies': [],
-    'proxies-groups': [],
+    'proxy-groups': [],
   };
   try { 
     await fetch(url)
@@ -200,13 +200,13 @@ async function makeClashSub(shareLinks, chains, url) {
   if (chains.length > 0) {
     for (const c of chains) {
       c.slice(0, c.length-1).forEach(i => s.add(i));
-      sub['proxies-groups'].push({
+      sub['proxy-groups'].push({
         'name': 'Relay ' + c[c.length],
         'type': 'relay',
         'proxies': c,
       });
     }
-    sub['proxies-groups'].push({  // forward group
+    sub['proxy-groups'].push({  // forward group
       'name': 'Forward',
       'type': 'select',
       'proxies': [...s],
@@ -223,11 +223,11 @@ async function makeClashSub(shareLinks, chains, url) {
     'type': 'select',
     'proxies': l,
   };
-  sub['proxies-groups'].push(defaultGroup);
-  sub['proxies-groups'].forEach(group => {
+  sub['proxy-groups'].push(defaultGroup);
+  sub['proxy-groups'].forEach(group => {
     group['proxies'] = group['proxies'].map(i => shareLinks[i]['name']);
   });
-  sub['proxies-groups'].forEach(group => {
+  sub['proxy-groups'].forEach(group => {
     if (group['type'] === 'relay') defaultGroup['proxies'].push(group['name']);
   });
   return sub;
