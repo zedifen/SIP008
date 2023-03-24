@@ -201,7 +201,7 @@ async function makeClashSub(shareLinks, chains, url) {
     for (const c of chains) {
       c.slice(0, c.length-1).forEach(i => s.add(i));
       sub['proxy-groups'].push({
-        'name': 'Relay ' + c[c.length],
+        'name': 'Relay ' + c[c.length-1],
         'type': 'relay',
         'proxies': c,
       });
