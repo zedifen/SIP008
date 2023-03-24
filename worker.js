@@ -199,9 +199,12 @@ async function makeClashSub(shareLinks, chains, url) {
   const l = [];
   if (chains.length > 0) {
     for (const c of chains) {
-      for (let i = 0; i < c.length - 1; i += 1) {
-        s.add(c[i]);
-      }
+      c.slice(0, c.length-1).forEach(i => s.add(i));
+      sub['proxies-groups'].push({
+        'name': 'Relay ' + c[c.length],
+        'type': 'relay',
+        'proxies': c,
+      });
     }
     sub['proxies-groups'].push({  // forward group
       'name': 'Forward',
@@ -215,13 +218,17 @@ async function makeClashSub(shareLinks, chains, url) {
     sub['proxies'].push(t);
     if (!s.has(k)) { l.push(k); }
   });
-  sub['proxies-groups'].push({  // default group
+  let defaultGroup = {  // default group
     'name': 'Default',
     'type': 'select',
     'proxies': l,
-  });
+  };
+  sub['proxies-groups'].push(defaultGroup);
   sub['proxies-groups'].forEach(group => {
     group['proxies'] = group['proxies'].map(i => shareLinks[i]['name']);
+  });
+  sub['proxies-groups'].forEach(group => {
+    if (group['type'] === 'relay') defaultGroup['proxies'].push(group['name']);
   });
   return sub;
 }
