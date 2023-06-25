@@ -12,6 +12,17 @@ export default {
   }
 }
 
+function base64ToBytes(base64) {
+  const binString = atob(base64);
+  return Uint8Array.from(binString, (m) => m.codePointAt(0));
+}
+
+function fromBinary(encoded) {
+  const bytes = base64ToBytes(encoded)
+  let utf8decoder = new TextDecoder();
+  return utf8decoder.decode(bytes);
+}
+
 function dumpToYaml(obj, depth=0, inArray) {
   const indent = '  ';
   let s = '';
@@ -105,7 +116,7 @@ function sip008toClash(obj) {
 }
 
 function vmessLinkToClash(link) {
-  const d = JSON.parse(atob(link.slice(8)));  // skip 'vmess://'
+  const d = JSON.parse(fromBinary(link.slice(8)));  // skip 'vmess://'
   let config = {
     name: d['ps'] || d['remark'] || 'vmess',
     type: 'vmess',
