@@ -164,6 +164,7 @@ function makeSIP008Sub(shareLinks, route) {
   let sub = {
     'version': 1,
     'servers': [],
+    'clash': [],
   };
   const routeOptions = [  // Shadowsocks Android feature
     'all',
@@ -178,6 +179,8 @@ function makeSIP008Sub(shareLinks, route) {
   Object.entries(shareLinks).forEach(([i, link]) => {
     if (link.startsWith('ss:')) {
       sub['servers'].push(ssToSIP008(link, r));
+    } else if (link.startsWith('vmess:')) {
+      sub['clash'].push(vmessLinkToClash(link));
     }
   });
   return sub;
