@@ -104,6 +104,7 @@ function sip008toClash(obj) {
       let l = opt.split('=');
       opts[l[0]] = (l.length > 1) ? l[1] : l[0];
     }
+    if (opts['mode'] && opts['mode'] === 'quic') return null;
     config['plugin'] = obj['plugin'],
     config['plugin-opts'] = {
       'mode': opts['mode'] || 'websocket',
@@ -228,6 +229,7 @@ async function makeClashSub(shareLinks, chains, url) {
   }
   Object.entries(shareLinks).forEach(([k, v]) => {
     const t = parseLink(v);
+    if (!t) return;
     shareLinks[k] = t;
     sub['proxies'].push(t);
     if (!s.has(k)) { l.push(k); }
