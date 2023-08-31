@@ -232,8 +232,9 @@ async function makeClashSub(shareLinks, chains, url) {
     sub['proxies'].push(t);
     if (!s.has(k)) { l.push(k); }
   });
+  const DEFAULT_GROUP_NAME = 'Proxy';
   let defaultGroup = {  // default group
-    'name': 'Default',
+    'name': DEFAULT_GROUP_NAME,
     'type': 'select',
     'proxies': l,
   };
@@ -244,6 +245,63 @@ async function makeClashSub(shareLinks, chains, url) {
   sub['proxy-groups'].forEach(group => {
     if (group['type'] === 'relay') defaultGroup['proxies'].push(group['name']);
   });
+  sub['proxy-groups'].push({
+    'name': 'CHN',
+    'type': 'select',
+    'proxies': ['DIRECT', DEFAULT_GROUP_NAME],
+  });
+  sub['proxy-groups'].push({
+    'name': 'Apple-CHN',
+    'type': 'select',
+    'proxies': ['DIRECT', DEFAULT_GROUP_NAME],
+  });
+  sub['proxy-groups'].push({
+    'name': 'Google-CHN',
+    'type': 'select',
+    'proxies': ['DIRECT', DEFAULT_GROUP_NAME],
+  });
+  sub['proxy-groups'].push({
+    'name': 'Telegram',
+    'type': 'select',
+    'proxies': [DEFAULT_GROUP_NAME, 'DIRECT'],
+  });
+  sub['proxy-groups'].push({
+    'name': 'Final',
+    'type': 'select',
+    'proxies': [DEFAULT_GROUP_NAME, 'DIRECT'],
+  });
+  let rules = [];
+  await fetch('https://core.telegram.org/resources/cidr.txt')
+    .then(r => r.text())
+    .then(t => {
+      for (const ipCIDR of t.split(/\r?\n/)) {
+        if (ipCIDR.indexOf('.') != -1) {
+          rules.push('IP-CIDR,' + ipCIDR + ',Telegram,no-resolve');
+        } else if (ipCIDR.indexOf(':') != -1) {
+          rules.push('IP-CIDR6,' + ipCIDR + ',Telegram,no-resolve');
+        }
+      }
+    });
+  const domainListsUrlPrefix = 'https://raw.githubusercontent.com/felixonmars/dnsmasq-china-list/master/';
+  const domainLists = {
+    'CHN': 'accelerated-domains.china.conf',
+    'Apple-CHN': 'apple.china.conf',
+    'Google-CHN': 'google.china.conf',
+  };
+  for (const i in domainLists) {
+    await fetch(domainListsUrlPrefix + domainLists[i])
+      .then(r => r.text())
+      .then(t => {
+        for (const m of t.split(/\r?\n/)) {
+          if (m.startsWith('server')) {
+            let domain = m.slice(m.indexOf('/') + 1, m.lastIndexOf('/'))
+            rules.push('DOMAIN-SUFFIX,' + domain + ',' + i);
+          }
+        }
+      });
+  }
+  rules.push('MATCH,Final');
+  sub['rules'] = rules;
   return sub;
 }
 
