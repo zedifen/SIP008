@@ -152,7 +152,7 @@ function vmessLinkToClash(link) {
       config['http-opts'] = {
         method: 'GET',
         path: [
-          d[path],
+          d['path'],
         ]
       }
       break;
