@@ -263,6 +263,7 @@ async function handleRequest(request, {remoteResourceRoot, DB}) {
   const routeConvert = '/sip008'
   const routeGet = '/get'
   const routeCodeSrc = '/src.js'
+  const routeClashTemplate = '/clash.json'
 
   const pageUrl = new URL('ui.html', remoteResourceRoot).toString();
   const codeUrl = new URL('worker.js', remoteResourceRoot).toString();
@@ -366,6 +367,19 @@ async function handleRequest(request, {remoteResourceRoot, DB}) {
     let code;
     await fetch(codeUrl).then((r) => r.text()).then((t) => { code = t; });
     return new Response(code, {
+      status: 200,
+      headers: {
+        "content-type": "text/plain;charset=utf-8"
+      }
+    });
+  } else if (pathname.startsWith(routeClashTemplate)) {
+    let text;
+    const f = url.searchParams.get("format");
+    await fetch(clashConfigUrl).then((r) => r.text()).then((t) => { text = t; });
+    if (f == 'yaml') {
+      text = dumpToYaml(JSON.parse(text));
+    }
+    return new Response(text, {
       status: 200,
       headers: {
         "content-type": "text/plain;charset=utf-8"
