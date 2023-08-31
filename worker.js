@@ -133,7 +133,7 @@ function vmessLinkToClash(link) {
       config['ws-opts'] = {
         path: d['path'],
         headers: {
-          'Host': d['sni'],
+          'Host': d['host'] || d['sni'],
         },
         'max-early-data': 2048,
         'early-data-header-name': 'Sec-WebSocket-Protocol',
