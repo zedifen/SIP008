@@ -370,7 +370,7 @@ async function handleRequest(request, {remoteResourceRoot, DB}) {
               }
             });
             break;
-          case 'ss':
+          case 'sip008':
           default:
             return new Response(JSON.stringify(makeSIP008Sub(s, r)), {
               status: 200,
