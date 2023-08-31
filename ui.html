@@ -109,9 +109,18 @@ input:valid + span::after {
     const updateConvertedLink = (function () {
       const link = userInput.value.trim();
       let url = new URL(origin);
-      url.pathname = '/sip008/sub.json'
+      switch (subscriptionType.value) {
+        case 'clash':
+          url.pathname = '/sip008/sub.yaml'
+          url.searchParams.set('sub', 'clash');
+          break;
+        case 'sip008':
+        default:
+          url.pathname = '/sip008/sub.json'
+          url.searchParams.set('route', routeOption.value);
+          break;
+      }
       url.searchParams.set('link', link);
-      url.searchParams.set('route', routeOption.value);
       outputLink.value = link === '' ? '' : url.toString();
     });
     routeOption.addEventListener('input', updateConvertedLink);

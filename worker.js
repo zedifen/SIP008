@@ -307,12 +307,30 @@ async function handleRequest(request, {remoteResourceRoot, DB}) {
       } catch (err) {
         return new Response("Cannot parse content of the link.", { status: 400 });
       }
-      return new Response(JSON.stringify(makeSIP008Sub(shareLinks, r)), {
-        status: 200,
-        headers: {
-          "content-type": "application/json;charset=utf-8"
-        }
-      });
+      let s = {};
+      for (let i = 0; i < shareLinks.length; i += 1) {
+        if (shareLinks[i] == '') continue;
+        s[i] = shareLinks[i];
+      }
+      const t = url.searchParams.get("sub");
+      switch (t) {
+        case 'clash':
+          return new Response(dumpToYaml(await makeClashSub(s, [], clashConfigUrl)), {
+            status: 200,
+            headers: {
+              "content-type": "application/yaml;charset=utf-8"
+            }
+          });
+          break;
+        case 'sip008':
+        default:
+          return new Response(JSON.stringify(makeSIP008Sub(s, r)), {
+            status: 200,
+            headers: {
+              "content-type": "application/json;charset=utf-8"
+            }
+          });
+      }
     }
   } else if (pathname.startsWith(routeGet)) {
     const u = url.searchParams.get("user");
