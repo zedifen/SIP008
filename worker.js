@@ -338,10 +338,9 @@ async function handleRequest(request, {remoteResourceRoot, DB}) {
     const link = url.searchParams.get("link");
     const r = url.searchParams.get("route");
     if (link === null) {
-      let ui;
-      await fetch(pageUrl).then((r) => r.text()).then((t) => { ui = t; });
-      return new Response(ui, {
-        status: 200,
+      const {status, body} = await fetch(pageUrl);
+      return new Response(body, {
+        status,
         headers: {
           "content-type": "text/html;charset=utf-8"
         }
@@ -442,22 +441,17 @@ async function handleRequest(request, {remoteResourceRoot, DB}) {
       }
     }
   } else if (pathname == routeCodeSrc) {
-    let code;
-    await fetch(codeUrl).then((r) => r.text()).then((t) => { code = t; });
-    return new Response(code, {
-      status: 200,
+    const {body, status} = await fetch(codeUrl);
+    return new Response(body, {
+      status,
       headers: {
         "content-type": "text/plain;charset=utf-8"
       }
     });
   } else if (pathname.startsWith(routeClashTemplate)) {
-    let text;
     const f = url.searchParams.get("format");
-    await fetch(clashConfigUrl).then((r) => r.text()).then((t) => { text = t; });
-    if (f == 'yaml') {
-      text = dumpToYaml(JSON.parse(text));
-    }
-    return new Response(text, {
+    const r = await fetch(clashConfigUrl);
+    return new Response((f == 'yaml') ? dumpToYaml(JSON.parse((await r.text()))) : r.body, {
       status: 200,
       headers: {
         "content-type": "text/plain;charset=utf-8"
