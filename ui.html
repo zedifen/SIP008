@@ -129,7 +129,8 @@ input:valid + span::after {
     <button type="button" class="copy-link-button">Copy</button>
   </div>
   <script>
-    const origin = (window.location.origin + '/') || 'https://example.org/';
+    const subconvertPrefix = '/subconvert/';
+    const origin = (window.location.origin + (window.location.pathname.startsWith(subconvertPrefix) ? subconvertPrefix.slice(0, -1) : '/')) || 'https://example.org/';
     const routeOption = document.getElementById('route-option');
     const subscriptionLinkType = document.getElementById('subscription-link-type');
     const subscriptionType = document.getElementById('subscription-type');
@@ -140,11 +141,11 @@ input:valid + span::after {
       let url = new URL(origin);
       switch (subscriptionLinkType.value) {
         case 'sip008':
-          url.pathname = '/fromSIP008';
+          url.pathname += '/fromSIP008';
           break;
         case 'v2rayn':
         default:
-          url.pathname = '/fromV2RayN';
+          url.pathname += '/fromV2RayN';
           break;
       }
       switch (subscriptionType.value) {
@@ -176,16 +177,16 @@ input:valid + span::after {
       let url = new URL(origin);
       switch (subscriptionType.value) {
         case 'v2rayn':
-          url.pathname = '/get/sub';
+          url.pathname += '/get/sub';
           url.searchParams.set('sub', 'v2rayn');
           break;
         case 'clash':
-          url.pathname = '/get/sub.yaml';
+          url.pathname += '/get/sub.yaml';
           url.searchParams.set('sub', 'clash');
           break;
         case 'sip008':
         default:
-          url.pathname = '/get/sub.json';
+          url.pathname += '/get/sub.json';
           url.searchParams.set('route', routeOption.value);
           break;
       }

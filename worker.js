@@ -326,7 +326,10 @@ function isValidHttpUrl(s) {
 
 async function handleRequest(request, {remoteResourceRoot, DB}) {
   const url = new URL(request.url);
-  const pathname = url.pathname;
+
+  const subconvertPrefix = '/subconvert/';
+  const pathname = url.pathname.startsWith(subconvertPrefix) ? url.pathname.slice(subconvertPrefix.length - 1) : url.pathname;
+
   const routeConvertFromV2RayN = '/fromV2RayN'
   const routeConvertFromSIP008 = '/fromSIP008'
   const routeGet = '/get'
