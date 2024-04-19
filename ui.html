@@ -94,6 +94,7 @@ input:valid + span::after {
   </select></p></div>
   <h2>Convert <select name="subscriptionLinkType" id="subscription-link-type">
     <option value="v2rayn" selected>V2RayN</option>
+    <option value="sip008">SIP008</option>
   </select> Subscriptions</h2>
   <p>Input your subscription link: </p>
   <div class="link-input"><input 
@@ -138,6 +139,9 @@ input:valid + span::after {
       const link = userInput.value.trim();
       let url = new URL(origin);
       switch (subscriptionLinkType.value) {
+        case 'sip008':
+          url.pathname = '/fromSIP008';
+          break;
         case 'v2rayn':
         default:
           url.pathname = '/fromV2RayN';

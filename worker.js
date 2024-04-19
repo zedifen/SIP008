@@ -116,6 +116,15 @@ function sip008toClash(obj) {
   return config;
 }
 
+function sip008toSs(obj) {
+  const credentialPart = obj['method'].startsWith('2022-')
+    ? `${encodeURIComponent(obj['method'])}:${encodeURIComponent(obj['password'])}`
+    : btoa(`${obj['method']}:${obj['password']}`);
+  const pluginAndOpts = (obj['plugin']) ? obj['plugin'] + (obj['plugin_opts'] ? `;${obj['plugin_opts']}` : '') : undefined;
+  const query = pluginAndOpts ? `?plugin=${encodeURIComponent(pluginAndOpts)}` : '';
+  return `ss://${credentialPart}@${obj['server']}:${obj['server_port']}${query}#${encodeURIComponent(obj['remarks'])}`;
+}
+
 function vmessLinkToClash(link) {
   const d = JSON.parse(fromBinary(link.slice(8)));  // skip 'vmess://'
   let config = {
@@ -319,6 +328,7 @@ async function handleRequest(request, {remoteResourceRoot, DB}) {
   const url = new URL(request.url);
   const pathname = url.pathname;
   const routeConvertFromV2RayN = '/fromV2RayN'
+  const routeConvertFromSIP008 = '/fromSIP008'
   const routeGet = '/get'
   const routeCodeSrc = '/src.js'
   const routeClashTemplate = '/clash.json'
@@ -395,6 +405,61 @@ async function handleRequest(request, {remoteResourceRoot, DB}) {
             }
           });
       }
+    }
+  } else if (pathname.startsWith(routeConvertFromSIP008)) {
+    const link = url.searchParams.get("link");
+    const route = url.searchParams.get("route");
+    if (!isValidHttpUrl(link)) {
+      return new Response(`Link '${link}' is not valid.`, { status: 400 })
+    }
+    try {
+      const r = await fetch(link, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)',
+        }
+      });
+      const s = await r.json();
+      switch (url.searchParams.get('sub')) {
+        case 'v2rayn': {
+          return new Response(btoa(s['servers'].map(sip008toSs).join('\r\n')), {
+            status: 200,
+            headers: {
+              "content-type": "text/plain;charset=UTF-8"
+            }
+          });
+        }
+        case 'clash': {
+          return new Response(dumpToYaml(await makeClashSub(s['servers'].map(sip008toClash), [], clashConfigUrl)), {
+            status: 200,
+            headers: {
+              "content-type": "application/yaml;charset=utf-8"
+            }
+          });
+        }
+        case 'sip008':
+        default: {
+          const routeOptions = [  // Shadowsocks Android feature
+            'all',
+            'bypass-lan',
+            'bypass-china',
+            'bypass-lan-china',
+            'gfwlist',
+            'china-list',
+            'custom-rules'
+          ];
+          if (routeOptions.includes(route) && s['servers']) {
+            for (const i of s['servers']) { i['route'] = route; }
+          }
+          return new Response(JSON.stringify(s), {
+            status: 200,
+            headers: {
+              "content-type": "application/json;charset=utf-8"
+            }
+          });
+        }
+      }
+    } catch (err) {
+      return new Response(err.stack, { status: 400 });
     }
   } else if (pathname.startsWith(routeGet)) {
     const u = url.searchParams.get("user");
