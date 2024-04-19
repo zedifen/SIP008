@@ -59,7 +59,7 @@ function ssToSIP008(link, route) {
   let p = u.split('#');
   const name = decodeURIComponent(p[1]);
   let l = p[0].split('@');
-  let c = atob(l[0]).split(':');
+  let c = (l[0].indexOf(':') != -1) ? l[0].split(':').map(decodeURIComponent) : atob(l[0]).split(':');
   const method = c[0];
   const password = c[1];
   let s = l[1].split(':');
