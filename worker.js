@@ -187,7 +187,15 @@ function makeSIP008Sub(shareLinks, route) {
   return sub;
 }
 
-async function makeClashSub(shareLinks, chains, url) {
+function parseLinkToClashObject(link) {
+  if (link.startsWith('ss:')) {
+    return sip008toClash(ssToSIP008(link));
+  } else if (link.startsWith('vmess:')) {
+    return vmessLinkToClash(link);
+  } else { return null; }
+}
+
+async function makeClashSub(clashObjects, chains, url) {
   let sub = {
     'port': 7890,
     'socks-port': 7891,
@@ -202,13 +210,6 @@ async function makeClashSub(shareLinks, chains, url) {
       .then((d) => Object.entries(d).forEach(([k, v]) => {sub[k] = v}));
   } catch(err) {
     console.log(err);
-  }
-  const parseLink = (link) => {
-    if (link.startsWith('ss:')) {
-      return sip008toClash(ssToSIP008(link));
-    } else if (link.startsWith('vmess:')) {
-      return vmessLinkToClash(link);
-    } else { return null; }
   }
   const s = new Set();
   const l = [];
@@ -227,11 +228,8 @@ async function makeClashSub(shareLinks, chains, url) {
       'proxies': [...s],
     });
   }
-  Object.entries(shareLinks).forEach(([k, v]) => {
-    const t = parseLink(v);
-    if (!t) return;
-    shareLinks[k] = t;
-    sub['proxies'].push(t);
+  Object.entries(clashObjects).forEach(([k, v]) => {
+    sub['proxies'].push(v);
     if (!s.has(k)) { l.push(k); }
   });
   const DEFAULT_GROUP_NAME = 'Proxy';
@@ -242,7 +240,7 @@ async function makeClashSub(shareLinks, chains, url) {
   };
   sub['proxy-groups'].push(defaultGroup);
   sub['proxy-groups'].forEach(group => {
-    group['proxies'] = group['proxies'].map(i => shareLinks[i]['name']);
+    group['proxies'] = group['proxies'].map(i => clashObjects[i]['name']);
   });
   sub['proxy-groups'].forEach(group => {
     if (group['type'] === 'relay') defaultGroup['proxies'].push(group['name']);
@@ -374,7 +372,7 @@ async function handleRequest(request, {remoteResourceRoot, DB}) {
       const t = url.searchParams.get("sub");
       switch (t) {
         case 'clash':
-          return new Response(dumpToYaml(await makeClashSub(s, [], clashConfigUrl)), {
+          return new Response(dumpToYaml(await makeClashSub(Object.fromEntries(Object.entries(s).map(([k, v]) => { return [k, parseLinkToClashObject(v)] }).filter(([k, v]) => v)), [], clashConfigUrl)), {
             status: 200,
             headers: {
               "content-type": "application/yaml;charset=utf-8"
@@ -422,7 +420,7 @@ async function handleRequest(request, {remoteResourceRoot, DB}) {
         }
         switch (t) {
           case 'clash':
-            return new Response(dumpToYaml(await makeClashSub(s, c, clashConfigUrl)), {
+            return new Response(dumpToYaml(await makeClashSub(Object.fromEntries(Object.entries(s).map(([k, v]) => { return [k, parseLinkToClashObject(v)] }).filter(([k, v]) => v)), c, clashConfigUrl)), {
               status: 200,
               headers: {
                 "content-type": "application/yaml;charset=utf-8"
