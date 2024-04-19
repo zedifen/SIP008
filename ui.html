@@ -175,6 +175,10 @@ input:valid + span::after {
       const username = usernameInput.value.trim();
       let url = new URL(origin);
       switch (subscriptionType.value) {
+        case 'v2rayn':
+          url.pathname = '/get/sub';
+          url.searchParams.set('sub', 'v2rayn');
+          break;
         case 'clash':
           url.pathname = '/get/sub.yaml';
           url.searchParams.set('sub', 'clash');

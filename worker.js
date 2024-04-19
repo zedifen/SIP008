@@ -491,6 +491,14 @@ async function handleRequest(request, {remoteResourceRoot, DB}) {
           }
         }
         switch (t) {
+          case 'v2rayn': {
+            return new Response(btoa(Object.values(s).join('\r\n')), {
+              status: 200,
+              headers: {
+                "content-type": "text/plain;charset=UTF-8"
+              }
+            });
+          }
           case 'clash':
             return new Response(dumpToYaml(await makeClashSub(Object.fromEntries(Object.entries(s).map(([k, v]) => { return [k, parseLinkToClashObject(v)] }).filter(([k, v]) => v)), c, clashConfigUrl)), {
               status: 200,
