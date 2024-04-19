@@ -167,6 +167,7 @@ input:valid + span::after {
       outputLink.value = link === '' ? '' : url.toString();
     });
     routeOption.addEventListener('input', updateConvertedLink);
+    subscriptionLinkType.addEventListener('input', updateConvertedLink);
     subscriptionType.addEventListener('input', updateConvertedLink);
     userInput.addEventListener('input', updateConvertedLink);
 
