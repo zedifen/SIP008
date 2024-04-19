@@ -350,16 +350,16 @@ async function handleRequest(request, {remoteResourceRoot, DB}) {
         return new Response("Link '" + link + "' is not valid.", { status: 400 })
       }
       let returnedContent;
-      await fetch(link, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)',
-        }
-      })
-        .then((response) => response.text())
-        .then((t) => {
-          returnedContent = t;
-        })
-        .catch((err) => new Response(err.stack, { status: 500 }));
+      try {
+        const r = await fetch(link, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)',
+          }
+        });
+        returnedContent = await r.text();
+      } catch (err) {
+        return new Response(err.stack, { status: 500 });
+      }
       let shareLinks;
       try {
         shareLinks = atob(returnedContent).split(/\r?\n/);
