@@ -89,6 +89,7 @@ input:valid + span::after {
   <p><label for="subscriptionType">Subscription Type:</label>
   <select name="subscriptionType" id="subscription-type">
     <option value="sip008" selected>SIP008</option>
+    <option value="v2rayn">V2RayN</option>
     <option value="clash">Clash</option>
   </select></p></div>
   <h2>Convert <select name="subscriptionLinkType" id="subscription-link-type">
@@ -146,6 +147,10 @@ input:valid + span::after {
         case 'clash':
           url.pathname += '/sub.yaml'
           url.searchParams.set('sub', 'clash');
+          break;
+        case 'v2rayn':
+          url.pathname += '/sub'
+          url.searchParams.set('sub', 'v2rayn');
           break;
         case 'sip008':
         default:

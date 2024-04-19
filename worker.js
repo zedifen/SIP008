@@ -371,6 +371,13 @@ async function handleRequest(request, {remoteResourceRoot, DB}) {
       }
       const t = url.searchParams.get("sub");
       switch (t) {
+        case 'v2rayn':
+          return new Response(returnedContent, {
+            status: 200,
+            headers: {
+              "content-type": "text/plain;charset=UTF-8"
+            }
+          });
         case 'clash':
           return new Response(dumpToYaml(await makeClashSub(Object.fromEntries(Object.entries(s).map(([k, v]) => { return [k, parseLinkToClashObject(v)] }).filter(([k, v]) => v)), [], clashConfigUrl)), {
             status: 200,
