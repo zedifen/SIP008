@@ -320,7 +320,7 @@ function isValidHttpUrl(s) {
 async function handleRequest(request, {remoteResourceRoot, DB}) {
   const url = new URL(request.url);
   const pathname = url.pathname;
-  const routeConvert = '/sip008'
+  const routeConvertFromV2RayN = '/fromV2RayN'
   const routeGet = '/get'
   const routeCodeSrc = '/src.js'
   const routeClashTemplate = '/clash.json'
@@ -334,7 +334,7 @@ async function handleRequest(request, {remoteResourceRoot, DB}) {
     return await DB.get(sId);
   };
 
-  if (pathname === '/' || pathname.startsWith(routeConvert)) {
+  if (pathname === '/' || pathname.startsWith('/sip008') || pathname.startsWith(routeConvertFromV2RayN)) {
     const link = url.searchParams.get("link");
     const r = url.searchParams.get("route");
     if (link === null) {

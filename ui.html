@@ -91,11 +91,13 @@ input:valid + span::after {
     <option value="sip008" selected>SIP008</option>
     <option value="clash">Clash</option>
   </select></p></div>
-  <h2>Convert V2RayN Subscriptions</h2>
+  <h2>Convert <select name="subscriptionLinkType" id="subscription-link-type">
+    <option value="v2rayn" selected>V2RayN</option>
+  </select> Subscriptions</h2>
   <p>Input your subscription link: </p>
   <div class="link-input"><input 
-    id="v2rayn-link"
-    name="v2rayn-link"
+    id="subscription-link"
+    name="subscription-link"
     type="url"
     pattern="https://.*"
     title="Paste V2RayN subscription link here ..."
@@ -127,20 +129,27 @@ input:valid + span::after {
   <script>
     const origin = (window.location.origin + '/') || 'https://example.org/';
     const routeOption = document.getElementById('route-option');
+    const subscriptionLinkType = document.getElementById('subscription-link-type');
     const subscriptionType = document.getElementById('subscription-type');
-    const userInput = document.getElementById('v2rayn-link');
+    const userInput = document.getElementById('subscription-link');
     const outputLink = document.getElementById('converted');
     const updateConvertedLink = (function () {
       const link = userInput.value.trim();
       let url = new URL(origin);
+      switch (subscriptionLinkType.value) {
+        case 'v2rayn':
+        default:
+          url.pathname = '/fromV2RayN';
+          break;
+      }
       switch (subscriptionType.value) {
         case 'clash':
-          url.pathname = '/sip008/sub.yaml'
+          url.pathname += '/sub.yaml'
           url.searchParams.set('sub', 'clash');
           break;
         case 'sip008':
         default:
-          url.pathname = '/sip008/sub.json'
+          url.pathname += '/sub.json'
           url.searchParams.set('route', routeOption.value);
           break;
       }
