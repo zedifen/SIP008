@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Convert V2RayN/SIP008 subscription to SIP008/V2RayN. Powered by Cloudflare.">
+  <meta name="description" content="Convert V2RayN/SIP008 subscription to SIP008/V2RayN. Powered by Cloudflare Workers.">
   <link rel="icon" type="image/png" href="https://workers.cloudflare.com/favicon.ico" sizes="48x48">
-  <title>Subscription Services</title>
+  <title>SIP008/V2RayN Subscription Services</title>
   <style>
 body {
   padding: 10px;
@@ -76,7 +76,10 @@ input:valid + span::after {
   <p>Clash configuration template in use: <a href="./clash.json">clash.json</a> (<a href="./clash.json?format=yaml">YAML format</a>).</p>
   <p>For safety you may want to host this yourself, then please follow the instructions in <a href="./src.js">the script</a>.</p>
 </div>
-  <h2>Settings</h2>
+  <h2>Convert <select name="subscriptionLinkType" id="subscription-link-type">
+    <option value="v2rayn" selected>V2RayN</option>
+    <option value="sip008">SIP008</option>
+  </select> Subscriptions</h2>
   <div><p><label for="routeOption">
       Route options <a href="https://github.com/shadowsocks/shadowsocks-android/blob/master/.github/doc-json.md" title="Feature of Shadowsocks Android">(?)</a>:
   </label>
@@ -89,16 +92,12 @@ input:valid + span::after {
     <option value="china-list">China List</option>
     <option value="custom-rules">Custom Rules</option>
   </select></p>
-  <p><label for="subscriptionType">Subscription Type:</label>
+  <p><label for="subscriptionType">Target subscription type:</label>
   <select name="subscriptionType" id="subscription-type">
     <option value="sip008" selected>SIP008</option>
     <option value="v2rayn">V2RayN</option>
     <option value="clash">Clash</option>
   </select></p></div>
-  <h2>Convert <select name="subscriptionLinkType" id="subscription-link-type">
-    <option value="v2rayn" selected>V2RayN</option>
-    <option value="sip008">SIP008</option>
-  </select> Subscriptions</h2>
   <p>Input your subscription link: </p>
   <div class="link-input"><input 
     id="subscription-link"
