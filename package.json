@@ -1,0 +1,10 @@
+{
+    "name": "sip008-worker",
+    "version": "0.0.0",
+    "private": "true",
+    "devDependencies": {
+        "@cloudflare/workers-types": "^4.20240423.0",
+        "typescript": "^5.4.5",
+        "wrangler": "^3.52.0"
+    }
+}
