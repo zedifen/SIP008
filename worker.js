@@ -17,7 +17,7 @@ function base64ToBytes(base64) {
   return Uint8Array.from(binString, (m) => m.codePointAt(0));
 }
 
-function fromBinary(encoded) {
+function decodeBase64EncodedUTF8(encoded) {
   const bytes = base64ToBytes(encoded)
   let utf8decoder = new TextDecoder();
   return utf8decoder.decode(bytes);
@@ -126,7 +126,7 @@ function sip008toSs(obj) {
 }
 
 function vmessLinkToClash(link) {
-  const d = JSON.parse(fromBinary(link.slice(8)));  // skip 'vmess://'
+  const d = JSON.parse(decodeBase64EncodedUTF8(link.slice(8)));  // skip 'vmess://'
   let config = {
     name: d['ps'] || d['remark'] || 'vmess',
     type: 'vmess',
