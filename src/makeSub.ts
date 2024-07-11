@@ -11,7 +11,7 @@ export function makeSIP008Sub(shareLinks: {[index: number]: string}, route: stri
   };
 
   const r: ShadowsocksAndroidRouteOption = routeOptions.includes((route as ShadowsocksAndroidRouteOption)) ? (route as ShadowsocksAndroidRouteOption) : 'bypass-lan-china';
-  Object.entries(shareLinks).forEach(([i, link]) => {
+  Object.entries(shareLinks).forEach(([_i, link]) => {
     if (link.startsWith('ss:')) {
       sub['servers'].push(ssToSIP008(link, r));
     } else if (link.startsWith('vmess:')) {
@@ -31,7 +31,7 @@ export function parseLinkToClashObject(link: string) {
 }
 
 export async function makeClashSub(clashObjects: {[index: string]: ClashNodeConfig}, chains: string[][], url: string) {
-  const sub: ClashSub = {
+  let sub: ClashSub = {
     'port': 7890,
     'socks-port': 7891,
     'allow-lan': false,
@@ -42,10 +42,7 @@ export async function makeClashSub(clashObjects: {[index: string]: ClashNodeConf
   };
   try { 
     const r = await fetch(url);
-    const d: any = await r.json();
-    for (const [k, v] of Object.entries(d)) {
-      (sub as any)[k] = v;
-    }
+    sub = await r.json() as ClashSub;
   } catch(err) {
     console.log(err);
   }
@@ -73,7 +70,7 @@ export async function makeClashSub(clashObjects: {[index: string]: ClashNodeConf
   const DEFAULT_GROUP_NAME = 'Proxy';
   const defaultGroup = {  // default group
     'name': DEFAULT_GROUP_NAME,
-    'type': ('select' as 'select'),
+    'type': ('select' as const),
     'proxies': l,
   };
   sub['proxy-groups'].push(defaultGroup);

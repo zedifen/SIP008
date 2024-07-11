@@ -70,7 +70,7 @@ async function handleRequest(request: Request, {remoteResourceRoot, DB}: Env) {
         });
         returnedContent = await r.text();
       } catch (err) {
-        return new Response(err.stack, { status: 500 });
+        return new Response((err as Error).stack, { status: 500 });
       }
       let shareLinks;
       try {
@@ -93,7 +93,7 @@ async function handleRequest(request: Request, {remoteResourceRoot, DB}: Env) {
             }
           });
         case 'clash':
-          return new Response(dumpToYaml(await makeClashSub(Object.fromEntries(Object.entries(s).map(([k, v]) => { return [k, parseLinkToClashObject(v)] }).filter(([k, v]) => v)), [], clashConfigUrl)), {
+          return new Response(dumpToYaml(await makeClashSub(Object.fromEntries(Object.entries(s).map(([k, v]) => { return [k, parseLinkToClashObject(v)] }).filter(([_k, v]) => v)), [], clashConfigUrl)), {
             status: 200,
             headers: {
               "content-type": "application/yaml;charset=utf-8"
@@ -153,7 +153,7 @@ async function handleRequest(request: Request, {remoteResourceRoot, DB}: Env) {
         }
       }
     } catch (err) {
-      return new Response(err.stack, { status: 400 });
+      return new Response((err as Error).stack, { status: 400 });
     }
   } else if (pathname.startsWith(routeGet)) {
     const u = url.searchParams.get("user");
@@ -194,7 +194,7 @@ async function handleRequest(request: Request, {remoteResourceRoot, DB}: Env) {
             });
           }
           case 'clash':
-            return new Response(dumpToYaml(await makeClashSub(Object.fromEntries(Object.entries(s).map(([k, v]) => { return [k, parseLinkToClashObject(v)] }).filter(([k, v]) => v)), c, clashConfigUrl)), {
+            return new Response(dumpToYaml(await makeClashSub(Object.fromEntries(Object.entries(s).map(([k, v]) => { return [k, parseLinkToClashObject(v)] }).filter(([_k, v]) => v)), c, clashConfigUrl)), {
               status: 200,
               headers: {
                 "content-type": "application/yaml;charset=utf-8"
