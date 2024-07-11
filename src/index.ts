@@ -1,12 +1,17 @@
-// Host the page html as-is and this script on some service like GitHub Gist.
+// Host these code on some service like GitHub Gist.
 // Then deploy this to Cloudflare Workers.
 // Remember to set Environment Variables as below.
 
 import { sip008toClash, sip008toSs } from "./fromSIP008.ts";
 import { makeClashSub, makeSIP008Sub, parseLinkToClashObject } from "./makeSub.ts";
 import { SIP008Sub, ShadowsocksAndroidRouteOption, routeOptions } from "./types/shadowsocks.ts";
+import { ClashSub } from "./types/clash.ts";
 import { isValidHttpUrl } from "./utils/url.ts";
 import { dumpToYaml } from "./utils/yaml.ts";
+
+import { html } from './templates/ui.html.ts'
+
+import clashTemplate from './templates/clash.json';
 
 // remoteResourceRoot : https://gist.githubusercontent.com/{YOUR_USER_NAME}/{REPO_HASH}/raw/{ui.html|worker.js|clash.json}
 
@@ -32,12 +37,7 @@ async function handleRequest(request: Request, {remoteResourceRoot, DB}: Env) {
   const routeConvertFromV2RayN = '/fromV2RayN'
   const routeConvertFromSIP008 = '/fromSIP008'
   const routeGet = '/get'
-  const routeCodeSrc = '/src.js'
-  const routeClashTemplate = '/clash.json'
-
-  const pageUrl = new URL('ui.html', remoteResourceRoot).toString();
-  const codeUrl = new URL('worker.js', remoteResourceRoot).toString();
-  const clashConfigUrl = new URL('clash.json', remoteResourceRoot).toString();
+  const routeCodeSrc = '/src'
 
   const getValueOfKey = async function (sId: string) {
     if (sId === '' || sId === null) return null;
@@ -48,9 +48,7 @@ async function handleRequest(request: Request, {remoteResourceRoot, DB}: Env) {
     const link = url.searchParams.get("link");
     const r = url.searchParams.get("route");
     if (link === null) {
-      const {status, body} = await fetch(pageUrl);
-      return new Response(body, {
-        status,
+      return new Response(html, {
         headers: {
           "content-type": "text/html;charset=utf-8"
         }
@@ -91,7 +89,7 @@ async function handleRequest(request: Request, {remoteResourceRoot, DB}: Env) {
             }
           });
         case 'clash':
-          return new Response(dumpToYaml(await makeClashSub(Object.fromEntries(Object.entries(s).map(([k, v]) => { return [k, parseLinkToClashObject(v)] }).filter(([_k, v]) => v)), [], clashConfigUrl)), {
+          return new Response(dumpToYaml(await makeClashSub(Object.fromEntries(Object.entries(s).map(([k, v]) => { return [k, parseLinkToClashObject(v)] }).filter(([_k, v]) => v)), [], clashTemplate as ClashSub)), {
             status: 200,
             headers: {
               "content-type": "application/yaml;charset=utf-8"
@@ -130,7 +128,7 @@ async function handleRequest(request: Request, {remoteResourceRoot, DB}: Env) {
           });
         }
         case 'clash': {
-          return new Response(dumpToYaml(await makeClashSub(Object.fromEntries(s['servers'].map((v, i) => [i.toString(), sip008toClash(v)]).filter(([_i, v]) => v)), [], clashConfigUrl)), {
+          return new Response(dumpToYaml(await makeClashSub(Object.fromEntries(s['servers'].map((v, i) => [i.toString(), sip008toClash(v)]).filter(([_i, v]) => v)), [], clashTemplate as ClashSub)), {
             status: 200,
             headers: {
               "content-type": "application/yaml;charset=utf-8"
@@ -192,7 +190,7 @@ async function handleRequest(request: Request, {remoteResourceRoot, DB}: Env) {
             });
           }
           case 'clash':
-            return new Response(dumpToYaml(await makeClashSub(Object.fromEntries(Object.entries(s).map(([k, v]) => { return [k, parseLinkToClashObject(v)] }).filter(([_k, v]) => v)), c, clashConfigUrl)), {
+            return new Response(dumpToYaml(await makeClashSub(Object.fromEntries(Object.entries(s).map(([k, v]) => { return [k, parseLinkToClashObject(v)] }).filter(([_k, v]) => v)), c, clashTemplate as ClashSub)), {
               status: 200,
               headers: {
                 "content-type": "application/yaml;charset=utf-8"
@@ -209,23 +207,26 @@ async function handleRequest(request: Request, {remoteResourceRoot, DB}: Env) {
         }
       }
     }
-  } else if (pathname == routeCodeSrc) {
-    const {body, status} = await fetch(codeUrl);
-    return new Response(body, {
-      status,
-      headers: {
-        "content-type": "text/plain;charset=utf-8"
-      }
-    });
-  } else if (pathname.startsWith(routeClashTemplate)) {
+  } else if (pathname.startsWith(routeCodeSrc)) {
+    if (pathname == '/src.js' || pathname == '/src' || pathname == '/src/') {
+      return Response.redirect(new URL(
+        url.pathname.startsWith(subconvertPrefix) ? subconvertPrefix + 'src/index.ts' : '/src/index.ts',
+        url.origin,
+      ).toString(), 308);
+    }
+    const r = await fetch(new URL(pathname.slice(1), remoteResourceRoot));
     const f = url.searchParams.get("format");
-    const r = await fetch(clashConfigUrl);
-    return new Response((f == 'yaml') ? dumpToYaml(JSON.parse((await r.text()))) : r.body, {
-      status: 200,
+    return new Response((f == 'yaml' && pathname.endsWith('.json')) ? dumpToYaml(JSON.parse((await r.text()))) : r.body, {
+      status: r.status,
       headers: {
         "content-type": "text/plain;charset=utf-8"
       }
     });
+  } else if (pathname.startsWith('/clash.json')) {
+    return Response.redirect(new URL(
+      url.pathname.startsWith(subconvertPrefix) ? subconvertPrefix + 'src/templates' + pathname : '/src/templates' + pathname,
+      url.origin,
+    ).toString(), 308);
   } else {
     return new Response('Path not found.', {
       status: 404,

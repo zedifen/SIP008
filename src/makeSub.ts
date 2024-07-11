@@ -30,22 +30,8 @@ export function parseLinkToClashObject(link: string) {
   } else { return null; }
 }
 
-export async function makeClashSub(clashObjects: {[index: string]: ClashNodeConfig}, chains: string[][], url: string) {
-  let sub: ClashSub = {
-    'port': 7890,
-    'socks-port': 7891,
-    'allow-lan': false,
-    'mode': 'rule',
-    'proxies': [],
-    'proxy-groups': [],
-    'rules': [],
-  };
-  try { 
-    const r = await fetch(url);
-    sub = await r.json() as ClashSub;
-  } catch(err) {
-    console.log(err);
-  }
+export async function makeClashSub(clashObjects: {[index: string]: ClashNodeConfig}, chains: string[][], template: ClashSub) {
+  const sub = { ...template };
   const s = new Set<string>();
   const l: string[] = [];
   if (chains.length > 0) {
