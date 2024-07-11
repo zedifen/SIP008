@@ -73,7 +73,7 @@ input:valid + span::after {
   <h1>Subscription Services</h1>
 <div class="info">
   <p>Powered by <strong>Cloudflare Workers</strong>.</p>
-  <p>This service will not store the data you provided. This page is served as-is, while the script source can be checked at: <a href="./src.js">src.js</a>.</p>
+  <p>This service will not store the data you provided. This page is served as-is, while the script source can be checked from: <a href="./src/index.ts">src/index.ts</a>.</p>
   <p>Clash configuration template in use: <a href="./src/templates/clash.json">clash.json</a> (<a href="./src/templates/clash.json?format=yaml">YAML format</a>).</p>
   <p>For safety you may want to host this yourself, then please follow the instructions in <a href="./src.js">the script</a>.</p>
 </div>
