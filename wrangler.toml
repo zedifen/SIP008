@@ -1,0 +1,10 @@
+name = "sip008"
+main = "src/index.ts"
+compatibility_date = "2024-06-30"
+
+kv_namespaces = [
+    { binding = "DB", id = "2d7de2c2851b4daa9a8382f51278d008" }
+]
+
+[vars]
+remoteResourceRoot = "https://raw.githubusercontent.com/zedifen/SIP008/main/"

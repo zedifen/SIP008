@@ -2,8 +2,6 @@
 // Then deploy this to Cloudflare Workers.
 // Remember to set Environment Variables as below.
 
-import 'npm:@cloudflare/workers-types';
-
 import { sip008toClash, sip008toSs } from "./fromSIP008.ts";
 import { makeClashSub, makeSIP008Sub, parseLinkToClashObject } from "./makeSub.ts";
 import { SIP008Sub, ShadowsocksAndroidRouteOption, routeOptions } from "./types/shadowsocks.ts";
