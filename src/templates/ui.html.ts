@@ -78,7 +78,7 @@ input:valid + span::after {
   <p>For safety you may want to host this yourself, then please follow the instructions in <a href="./src.js">the script</a>.</p>
 </div>
   <h2>Convert <select name="subscriptionLinkType" id="subscription-link-type">
-    <option value="v2rayn" selected>V2RayN</option>
+    <option value="v2rayn" selected>V2RayN (share links; base64 or plain)</option>
     <option value="sip008">SIP008</option>
   </select> Subscriptions</h2>
   <div><p><label for="routeOption">

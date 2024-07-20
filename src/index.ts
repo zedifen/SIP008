@@ -8,6 +8,7 @@ import { SIP008Sub, ShadowsocksAndroidRouteOption, routeOptions } from "./types/
 import { ClashSub } from "./types/clash.ts";
 import { isValidHttpUrl } from "./utils/url.ts";
 import { dumpToYaml } from "./utils/yaml.ts";
+import { isBase64String, normalizeBase64String } from "./utils/base64.ts";
 
 import { html } from './templates/ui.html.ts'
 
@@ -70,7 +71,11 @@ async function handleRequest(request: Request, {remoteResourceRoot, DB}: Env) {
       }
       let shareLinks;
       try {
-        shareLinks = atob(returnedContent).split(/\r?\n/);
+        shareLinks = (
+          isBase64String(returnedContent) 
+            ? atob(normalizeBase64String(returnedContent))
+            : returnedContent
+        ).split(/\r?\n/);
       } catch (_err) {
         return new Response("Cannot parse content of the link.", { status: 400 });
       }

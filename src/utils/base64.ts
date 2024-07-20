@@ -23,3 +23,19 @@ export function base64EncodeStringAsUTF8(text: string) {
   const s = String.fromCharCode(...bytes);
   return btoa(s);
 }
+
+export function isBase64String(s: string): boolean {
+  // test possible trailing "=" paddings
+  let i = 0;
+  while (s[s.length - 1 - i] == '=') {
+    i += 1;
+    if (i > 2) return false;
+  }
+  if (i > 0 && s.length % 4 != 0) { return false; }  // has incorrect number of paddings
+  const t = (i == 0 ? s : s.slice(0, -i));
+  return /^[A-Za-z0-9+/]*/.test(t) || /^[A-Za-z0-9\-_]*/.test(t) || /^[A-Za-z0-9+,]*/.test(t);
+}
+
+export function normalizeBase64String(s: string): string {
+  return s.replaceAll('-', '+').replaceAll(/_,/g, '/');
+}
